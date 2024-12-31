@@ -34,7 +34,7 @@ while True:
     except ValueError:
         print("Invalid input. Please enter a numeric value between 1 and 18.")
 
-# Load the Excel file
+# Load the Excel file for source data
 file_path = "your/file/path/"
 data = pd.ExcelFile(file_path)
 # data
@@ -116,36 +116,6 @@ df_copy = df_copy.round(2)
 
 # Rounding the 'GWD' column to zero decimal places and converting to integer
 df_copy['GWD'] = df_copy['GWD'].round(0).astype(int)
-
-# Filter df_copy to include only records where 'G' (Games Played) is greater than or equal to 8
-filtered_8_games_df_copy = df_copy[df_copy['G'] >= 8]
-
-# Select only numeric columns for groupby().mean()
-numeric_columns = filtered_8_games_df_copy.select_dtypes(include=np.number).columns
-
-# Select top quarterbacks by average TDs thrown per season
-# top_qbs = filtered_8_games_df_copy.groupby('Player').mean().nlargest(5, 'TD'
-# Group by 'Player' and calculate the mean of numeric columns only
-top_qbs = (
-    filtered_8_games_df_copy.groupby('Player')[numeric_columns]
-    .mean()
-    .nlargest(5, 'TD')  # Top 5 players by 'TD'
-)
-
-# Filter the data to include only players who played at least 8 games
-filtered_data_8_games = filtered_8_games_df_copy[(filtered_8_games_df_copy['G'] >= 8) & (filtered_8_games_df_copy['GS'] > 0)]
-
-top_qbs_by_tds = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'TD').round(2)
-top_qbs_by_cmp = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'Cmp%').round(2)
-top_qbs_by_wins = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'Wins').round(2)
-top_qbs_by_qbr = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'QBR').round(2)
-top_qbs_by_rate = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'Rate').round(2)
-top_qbs_by_nya = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'NY/A').round(2)
-top_qbs_by_anya = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'ANY/A').round(2)
-top_qbs_by_gwd = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'GWD').round(2)
-top_qbs_by_td_to_int = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'TD_to_Int_Ratio').round(2)
-top_qbs_by_games_started = filtered_data_8_games.groupby('Player')[numeric_columns].mean().nlargest(10, 'GS').round(2)
-
 
 # Filter the data to include only players who played in 2024.
 filtered_data_2024 = df_copy[(df_copy['season'] == 2024)]
