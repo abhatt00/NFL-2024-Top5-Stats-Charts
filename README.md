@@ -30,4 +30,4 @@ I started running this code and receiving accurate resulting charts from Week 5 
 
 This repository contains code in a Python file that is run to obtain the resulting chart files, which are also included. 
 The charts included are an example of what I receive when I run the code weekly.
-I post all charts for each week at the end of each week of games to my personal TIkTok account (@galaxyace_12) for fun and user engagement.
+I post all charts for each week at the end of each week of games to my personal TIkTok account (@galaxyace_12) for fun and user engagement. URL: https://www.tiktok.com/@galaxyace_12 
