@@ -21,7 +21,17 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-# import tensorflow as tf
+
+# Prompt for the season year input
+while True:
+    try:
+        season_year = int(input("Enter the season year (e.g., 2024): "))
+        if season_year > 0:
+            break
+        else:
+            print("Please enter a valid positive year.")
+    except ValueError:
+        print("Invalid input. Please enter a numeric value for the year.")
 
 # Prompt for the week number input
 while True:
@@ -34,8 +44,8 @@ while True:
     except ValueError:
         print("Invalid input. Please enter a numeric value between 1 and 18.")
 
-# Load the Excel file for source data
-file_path = "your/file/path/"
+# Load the Excel file
+file_path = "your/file/path/here"
 data = pd.ExcelFile(file_path)
 # data
 
@@ -117,29 +127,44 @@ df_copy = df_copy.round(2)
 # Rounding the 'GWD' column to zero decimal places and converting to integer
 df_copy['GWD'] = df_copy['GWD'].round(0).astype(int)
 
+# Filter df_copy to include only records where 'G' (Games Played) is greater than or equal to 8
+filtered_8_games_df_copy = df_copy[df_copy['G'] >= 8]
+
+# Select only numeric columns for groupby().mean()
+numeric_columns = filtered_8_games_df_copy.select_dtypes(include=np.number).columns
+
+# Select top quarterbacks by average TDs thrown per season
+# top_qbs = filtered_8_games_df_copy.groupby('Player').mean().nlargest(5, 'TD'
+# Group by 'Player' and calculate the mean of numeric columns only
+top_qbs = (
+    filtered_8_games_df_copy.groupby('Player')[numeric_columns]
+    .mean()
+    .nlargest(5, 'TD')  # Top 5 players by 'TD'
+)
+
 # Filter the data to include only players who played in 2024.
-filtered_data_2024 = df_copy[(df_copy['season'] == 2024)]
+filtered_data_season = df_copy[(df_copy['season'] == season_year)]
 # Creating dataframes for top 5 players by different metrics in descending order
 # 1. Top 5 players by TD
-filtered_2024_top_5_td = filtered_data_2024.nlargest(5, 'TD')
+filtered_top_5_td = filtered_data_season.nlargest(5, 'TD')
 # 2. Top 5 players by Yards
-filtered_2024_top_5_yds = filtered_data_2024.nlargest(5, 'Yds')
+filtered_top_5_yds = filtered_data_season.nlargest(5, 'Yds')
 # 3. Top 5 players by Completions (Cmp)
-filtered_2024_top_5_cmp = filtered_data_2024.nlargest(5, 'Cmp')
+filtered_top_5_cmp = filtered_data_season.nlargest(5, 'Cmp')
 # 4. Top 5 players by Attempts (Att)
-filtered_2024_top_5_att = filtered_data_2024.nlargest(5, 'Att')
+filtered_top_5_att = filtered_data_season.nlargest(5, 'Att')
 # 5. Top 5 players by Wins
-filtered_2024_top_5_wins = filtered_data_2024.nlargest(5, 'Wins')
+filtered_top_5_wins = filtered_data_season.nlargest(5, 'Wins')
 # 6. Top 5 players by TD%
-filtered_2024_top_5_td_pct = filtered_data_2024.nlargest(5, 'TD%')
+filtered_top_5_td_pct = filtered_data_season.nlargest(5, 'TD%')
 # 7. Top 5 players by Sk%
-filtered_2024_top_5_sk_pct = filtered_data_2024.nlargest(5, 'Sk%')
+filtered_top_5_sk_pct = filtered_data_season.nlargest(5, 'Sk%')
 # 8. Top 5 players by Net Yards per Attempt (NY/A)
-filtered_2024_top_5_ny_a = filtered_data_2024.nlargest(5, 'NY/A')
+filtered_top_5_ny_a = filtered_data_season.nlargest(5, 'NY/A')
 # 9. Top 5 players by Adjusted Net Yards per Attempt (ANY/A)
-filtered_2024_top_5_any_a = filtered_data_2024.nlargest(5, 'ANY/A')
+filtered_top_5_any_a = filtered_data_season.nlargest(5, 'ANY/A')
 # 10. Top 5 players by TD to Interception Ratio (TD_to_Int_Ratio)
-filtered_2024_top_5_td_to_int_ratio = filtered_data_2024.nlargest(5, 'TD_to_Int_Ratio')
+filtered_top_5_td_to_int_ratio = filtered_data_season.nlargest(5, 'TD_to_Int_Ratio')
 
 print("Now making charts.")
 
@@ -172,21 +197,21 @@ def create_bar_plot_top_5(data, y_col, title, ylabel):
     return fig
 
 # Create and display the bar plot for top 5 players by TD
-fig_td = create_bar_plot_top_5(filtered_2024_top_5_td, 'TD', f'2024 Top 5 Players by Touchdowns (TD) through Week {week_number}', 'Touchdowns')
+fig_td = create_bar_plot_top_5(filtered_top_5_td, 'TD', f'{season_year} Top 5 Players by Touchdowns (TD) through Week {week_number}', 'Touchdowns')
 # Create and display the bar plot for top 5 players by TD
-fig_yds = create_bar_plot_top_5(filtered_2024_top_5_yds, 'Yds', f'2024 Top 5 Players by Passing Yards through Week {week_number}', 'Yards')
+fig_yds = create_bar_plot_top_5(filtered_top_5_yds, 'Yds', f'{season_year} Top 5 Players by Passing Yards through Week {week_number}', 'Yards')
 # Create and display the bar plot for top 5 players by TD
-fig_cmp = create_bar_plot_top_5(filtered_2024_top_5_cmp, 'Cmp', f'2024 Top 5 Players by Completions through Week {week_number}', 'Completions')
+fig_cmp = create_bar_plot_top_5(filtered_top_5_cmp, 'Cmp', f'{season_year} Top 5 Players by Completions through Week {week_number}', 'Completions')
 # Create and display the bar plot for top 5 players by TD
-fig_att = create_bar_plot_top_5(filtered_2024_top_5_att, 'Att', f'2024 Top 5 Players by Pass Attempts through Week {week_number}', 'Pass Attempts')
+fig_att = create_bar_plot_top_5(filtered_top_5_att, 'Att', f'{season_year} Top 5 Players by Pass Attempts through Week {week_number}', 'Pass Attempts')
 # Create and display the bar plot for top 5 players by TD
-fig_wins = create_bar_plot_top_5(filtered_2024_top_5_wins, 'Wins', f'2024 Top 5 Players by Wins through Week {week_number}', 'Games Won')
+fig_wins = create_bar_plot_top_5(filtered_top_5_wins, 'Wins', f'{season_year} Top 5 Players by Wins through Week {week_number}', 'Games Won')
 # Create and display the bar plot for top 5 players by TD
-fig_ny_a = create_bar_plot_top_5(filtered_2024_top_5_ny_a, 'NY/A', f'2024 Top 5 Players by Net Yards per Pass Attempt through Week {week_number}', 'NY/A')
+fig_ny_a = create_bar_plot_top_5(filtered_top_5_ny_a, 'NY/A', f'{season_year} Top 5 Players by Net Yards per Pass Attempt through Week {week_number}', 'NY/A')
 # Create and display the bar plot for top 5 players by TD
-fig_any_a = create_bar_plot_top_5(filtered_2024_top_5_any_a, 'ANY/A', f'2024 Top 5 Players by Adjusted Net Yards per Pass Attempt through Week {week_number}', 'ANY/A')
+fig_any_a = create_bar_plot_top_5(filtered_top_5_any_a, 'ANY/A', f'{season_year} Top 5 Players by Adjusted Net Yards per Pass Attempt through Week {week_number}', 'ANY/A')
 # Create and display the bar plot for top 5 players by TD
-fig_td_to_int_ratio = create_bar_plot_top_5(filtered_2024_top_5_td_to_int_ratio, 'TD_to_Int_Ratio', f'2024 Top 5 Players by TD to Interception Ratio through Week {week_number}', 'TD/Int Ratio')
+fig_td_to_int_ratio = create_bar_plot_top_5(filtered_top_5_td_to_int_ratio, 'TD_to_Int_Ratio', f'{season_year} Top 5 Players by TD to Interception Ratio through Week {week_number}', 'TD/Int Ratio')
 
 
 # End the timer
